@@ -2,7 +2,7 @@
   "name": "emaily",
   "version": "1.0.0",
   "scripts": {
-    "start": "node index.js --prefix server",
+    "start": "npm start --prefix server",
     "postinstall": "npm install --prefix server"
   }
 }
