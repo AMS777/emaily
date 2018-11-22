@@ -19,7 +19,7 @@ module.exports = app => {
     // 'http://localhost:3000/api/surveys/5bf6f65e79a5f24df6269aa2/yes'
     const p = new Path('/api/surveys/:surveyId/:choice');
 
-    const events = _.chain(req.body)
+    _.chain(req.body)
       .map(({ email, url }) => {
         const match = p.test(new URL(url).pathname);
         if (match) {
@@ -30,9 +30,21 @@ module.exports = app => {
       .compact()
       // remove duplicate elements
       .uniqBy('email', 'surveyId')
+      .each(({ surveyId, email, choice }) => {
+        Survey.updateOne(
+          {
+            _id: surveyId,
+            recipients: {
+              $elemMatch: { email, responded: false }
+            }
+          },
+          {
+            $inc: { [choice]: 1 },
+            $set: { 'recipients.$.responded': true }
+          }
+        ).exec();
+      })
       .value();
-
-    console.log(events);
 
     res.send({});
   });
